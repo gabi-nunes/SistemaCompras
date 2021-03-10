@@ -11,11 +11,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
+using SistemaCompra.API.Data;
+using MySql.Data.MySqlClient;
+using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace SistemaCompra
 {
     public class Startup
     {
+        private object mySqlConnection;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -26,7 +32,10 @@ namespace SistemaCompra
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            
+            services.AddDbContext<DataContext>(
+                context => context.UseMySql(Configuration.GetConnectionString("Default"))
+            );
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

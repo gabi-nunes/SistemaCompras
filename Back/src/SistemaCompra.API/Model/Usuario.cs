@@ -1,13 +1,18 @@
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
+
 namespace SistemaCompra.API.Model
 {
-    public class Usuario
+    public class Usuario : IdentityUser<int>
     {
-        public int UsuarioId { get; set; }
+       
+        public string fullName { get; set; }
 
-        public string NomeUsuario { get; set; }
+          public List<UserRole> UserRoles{ get; set; }
+ 
+      
 
-        public string  SenhaUsuario { get; set; }
-
-        public string CargoUsuario { get; set; }
+      
     }
 }
