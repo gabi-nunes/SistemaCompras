@@ -15,6 +15,10 @@ using Microsoft.EntityFrameworkCore;
 using SistemaCompra.API.Data;
 using MySql.Data.MySqlClient;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
+using Microsoft.AspNetCore.Identity;
+using SistemaCompra.API.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace SistemaCompra
 {
@@ -36,6 +40,29 @@ namespace SistemaCompra
             services.AddDbContext<DataContext>(
                 context => context.UseMySql(Configuration.GetConnectionString("Default"))
             );
+
+            IdentityBuilder builder = services.AddIdentityCore<Usuario>(options =>
+                                                        {
+                                                            options.Password.RequireDigit = false;
+                                                            options.Password.RequireNonAlphanumeric = false;
+                                                            options.Password.RequireLowercase= false;
+                                                            options.Password.RequireUppercase= false;
+                                                            options.Password.RequiredLength = 4;
+                                                        });
+            builder= new IdentityBuilder(builder.UserType, typeof(Roles), builder.Services);
+            builder.AddEntityFrameworkStores<DataContext>();
+            builder.AddRoleValidator<RoleValidator<Roles>>();
+            builder.AddRoleManager<RoleManager<Roles>>();
+            builder.AddSignInManager<SignInManager<Usuario>>();
+
+            services.AddMvc(
+                options =>{
+                    var policy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                });
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
