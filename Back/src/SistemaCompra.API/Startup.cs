@@ -19,6 +19,9 @@ using Microsoft.AspNetCore.Identity;
 using SistemaCompra.API.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace SistemaCompra
 {
@@ -54,6 +57,19 @@ namespace SistemaCompra
             builder.AddRoleValidator<RoleValidator<Roles>>();
             builder.AddRoleManager<RoleManager<Roles>>();
             builder.AddSignInManager<SignInManager<Usuario>>();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer(opt => {
+                                opt.TokenValidationParameters = new TokenValidationParameters
+                                {
+                                    ValidateIssuerSigningKey = true,
+                                    IssuerSigningKey= new SymmetricSecurityKey(Encoding.ASCII
+                                    .GetBytes(Configuration.GetSection("appSettings: Token").Value)),
+                                    ValidateIssuer= false,
+                                    ValidateAudience= false
+                                    
+                                };
+                            });
 
             services.AddMvc(
                 options =>{
