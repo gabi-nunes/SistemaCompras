@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AutoMapper;
 
 namespace SistemaCompra
 {
@@ -40,36 +41,39 @@ namespace SistemaCompra
         public void ConfigureServices(IServiceCollection services)
         {
             
+            services.AddAutoMapper();
             services.AddDbContext<DataContext>(
                 context => context.UseMySql(Configuration.GetConnectionString("Default"))
             );
 
-            IdentityBuilder builder = services.AddIdentityCore<Usuario>(options =>
-                                                        {
-                                                            options.Password.RequireDigit = false;
-                                                            options.Password.RequireNonAlphanumeric = false;
-                                                            options.Password.RequireLowercase= false;
-                                                            options.Password.RequireUppercase= false;
-                                                            options.Password.RequiredLength = 4;
-                                                        });
-            builder= new IdentityBuilder(builder.UserType, typeof(Roles), builder.Services);
+             IdentityBuilder builder = services.AddIdentityCore<Usuario>(options => 
+            {
+                options.Password.RequireDigit = false; 
+                options.Password.RequireNonAlphanumeric = false; 
+                options.Password.RequireLowercase = false; 
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 4;
+            });
+
+            builder = new IdentityBuilder(builder.UserType, typeof(Roles), builder.Services);
             builder.AddEntityFrameworkStores<DataContext>();
             builder.AddRoleValidator<RoleValidator<Roles>>();
             builder.AddRoleManager<RoleManager<Roles>>();
             builder.AddSignInManager<SignInManager<Usuario>>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                            .AddJwtBearer(opt => {
-                                opt.TokenValidationParameters = new TokenValidationParameters
-                                {
-                                    ValidateIssuerSigningKey = true,
-                                    IssuerSigningKey= new SymmetricSecurityKey(Encoding.ASCII
-                                    .GetBytes(Configuration.GetSection("appSettings: Token").Value)),
-                                    ValidateIssuer= false,
-                                    ValidateAudience= false
-                                    
-                                };
-                            });
+                .AddJwtBearer(options => 
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII
+                                .GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
+                            ValidateIssuer = false,
+                            ValidateAudience = false
+                        };
+                    });
+            
 
             services.AddMvc(
                 options =>{
